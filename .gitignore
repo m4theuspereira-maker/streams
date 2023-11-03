@@ -8,3 +8,6 @@ coverage
 .husky
 
 .vscode
+
+base_hi.txt
+saida.csv
