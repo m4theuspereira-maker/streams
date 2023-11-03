@@ -65,28 +65,30 @@ export class ProcessFile {
     });
 
     reader.on("close", () => {
-      Promise.all([
-        this.writeCSVFile(
-          `${outputFile}-com-CEP-zerados.csv`,
-          invoicesWith0000CEP
-        ),
-        this.writeCSVFile(
-          `${outputFile}-com-ate-6-paginas.csv`,
-          invoicesWithMax6Pages
-        ),
-        this.writeCSVFile(
-          `${outputFile}-com-ate-12-paginas.csv`,
-          invoicesWithMax12Pages
-        ),
-        this.writeCSVFile(
-          `${outputFile}-com-mais-de12-paginas.csv`,
-          invoicesWithMoreThan12Pages
-        ),
-        this.writeCSVFile(
-          `${outputFile}-com-valor-da-fatura-0.csv`,
-          invoicesWithValue0
-        )
-      ]);
+      [
+        {
+          outputName: `${outputFile}-com-CEP-zerados.csv`,
+          invoices: invoicesWith0000CEP
+        },
+        {
+          outputName: `${outputFile}-com-ate-6-paginas.csv`,
+          invoices: invoicesWithMax6Pages
+        },
+        {
+          outputName: `${outputFile}-com-ate-12-paginas.csv`,
+          invoices: invoicesWithMax12Pages
+        },
+        {
+          outputName: `${outputFile}-com-mais-de-12-paginas.csv`,
+          invoices: invoicesWithMoreThan12Pages
+        },
+        {
+          outputName: `${outputFile}-com-valor-da-fatura-0.csv`,
+          invoices: invoicesWithValue0
+        }
+      ].forEach(({ outputName, invoices }) => {
+        this.writeCSVFile(outputName, invoices);
+      });
 
       var duracao = Date.now() - antes;
       console.log(duracao);
