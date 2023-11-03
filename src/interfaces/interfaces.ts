@@ -1,6 +1,6 @@
 export interface IInvoice {
   NomeCliente: string;
-  CEP: number;
+  CEP: string;
   RuaComComplemento: string;
   Bairro: string;
   Cidade: string;
