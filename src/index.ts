@@ -1,6 +1,5 @@
 import fs from "fs";
 import readline from "readline";
-import chalk from "chalk";
 import { ProcessFile } from "./process.file";
 
 const reader = readline.createInterface({
@@ -8,9 +7,9 @@ const reader = readline.createInterface({
   output: process.stdout
 });
 
-const red = chalk.bold.red;
-const green = chalk.bold.green;
 const processFile = new ProcessFile();
+
+const regex = /^\.\/|\/\.$/;
 
 function processPrompt(input: string) {
   try {
@@ -27,11 +26,14 @@ function processPrompt(input: string) {
     }
 
     reader.question(
-      `Agora digite o caminho para a saída dos arquivos.
-exemplo "./pastaSaida/" ou caso não queria salvar em uma pasta basta digita "."!\n`,
+      `Agora digite o caminho para a saída dos arquivos. Exemplo: "./pastaSaida/" ou caso não queria salvar em uma pasta basta digita "."!\n`,
       (answer) => {
         try {
-          if (!answer.includes(`./`) && !answer.includes(".")) {
+          if (
+            !answer.trim().startsWith("./") ||
+            !answer.trim().endsWith(`/`) ||
+            answer.trim() !== "."
+          ) {
             throw new Error(
               `caminho não encontrado! por favor, digite o caminho de saída conforme o exemplo: "./pastaSaida/" ou "."`
             );
@@ -49,24 +51,24 @@ exemplo "./pastaSaida/" ou caso não queria salvar em uma pasta basta digita "."
             );
           }
 
-          console.log(green("Processamento feito com sucesso!"));
+          console.log("Processamento feito com sucesso!");
           reader.close();
         } catch (error: any) {
           console.log(error.message);
-          reader.question("Digite o arquivo de entrada ", (answer) => {
+          reader.question(`Digite o arquivo de entrada: \n`, (answer) => {
             processPrompt(answer.trim());
           });
         }
       }
     );
   } catch (error: any) {
-    console.log(red(error.message));
-    reader.question("Digite o arquivo de entrada ", (answer) => {
+    console.log(error.message);
+    reader.question(`Digite o arquivo de entrada: \n`, (answer) => {
       processPrompt(answer.trim());
     });
   }
 }
 
-reader.question(green("Digite o arquivo de entrada "), (answer) => {
+reader.question(`Digite o arquivo de entrada: \n`, (answer) => {
   processPrompt(answer.trim());
 });
