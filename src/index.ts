@@ -2,12 +2,12 @@ import fs from "fs";
 import readline from "readline";
 
 import { ProcessFile } from "./process.file";
-const rl = readline.createInterface({
+const reader = readline.createInterface({
   input: process.stdin,
   output: process.stdout
 });
 
-// new ProcessFile().readTextFile(nomeArquivo, "./misera/saida.csv");
+const processFile = new ProcessFile();
 
 function processPrompt(input: string) {
   try {
@@ -23,7 +23,7 @@ function processPrompt(input: string) {
       );
     }
 
-    rl.question(
+    reader.question(
       `Agora digite o caminho para a saída dos arquivos.
 exemplo "./pastaSaida/" ou caso não queria salvar em uma pasta basta digita "."!\n`,
       (answer) => {
@@ -38,7 +38,7 @@ exemplo "./pastaSaida/" ou caso não queria salvar em uma pasta basta digita "."
             fs.mkdirSync(answer.trim());
           }
 
-          const result = new ProcessFile().readTextFile(input, "./saida.csv");
+          const result = processFile.readTextFile(input, "./saida.csv");
 
           if (result?.isValid === false) {
             throw new Error(
@@ -47,10 +47,10 @@ exemplo "./pastaSaida/" ou caso não queria salvar em uma pasta basta digita "."
           }
 
           console.log("Processamento feito com sucesso!");
-          rl.close();
+          reader.close();
         } catch (error: any) {
           console.log(error.message);
-          rl.question("Digite o arquivo de entrada ", (answer) => {
+          reader.question("Digite o arquivo de entrada ", (answer) => {
             processPrompt(answer.trim());
           });
         }
@@ -58,27 +58,12 @@ exemplo "./pastaSaida/" ou caso não queria salvar em uma pasta basta digita "."
     );
   } catch (error: any) {
     console.log(error.message);
-    rl.question("Digite o arquivo de entrada ", (answer) => {
+    reader.question("Digite o arquivo de entrada ", (answer) => {
       processPrompt(answer.trim());
     });
   }
 }
 
-rl.question("Digite o arquivo de entrada ", (answer) => {
+reader.question("Digite o arquivo de entrada ", (answer) => {
   processPrompt(answer.trim());
 });
-
-// const inputFilePath = args(process.argv.slice(2))._.at(0);
-// const socorro = fs.openSync(inputFilePath!, "r");
-// console.log(socorro);
-// async function a() {
-//   const { inputFilePath } = await inquirer.prompt({
-//     message: "escolha o arquivo de entrada",
-//     type: "input",
-//     name: "inputFilePath"
-//   });
-
-//   console.log(inputFilePath);
-// }
-
-// a();
