@@ -8,3 +8,8 @@ export interface IInvoice {
   ValorFatura: number;
   NumeroPaginas: number;
 }
+
+export interface IInputOrOutputValidation {
+  isValid: boolean;
+  message?: string;
+}

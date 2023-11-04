@@ -1,12 +1,12 @@
 import fs from "fs";
 import readline from "readline";
-import { IInvoice } from "./interfaces/interfaces";
+import { IInputOrOutputValidation, IInvoice } from "./interfaces/interfaces";
 
 export class ProcessFile {
   readTextFile(
     inputFile: string,
     outputFile: string
-  ): void | { isValid: boolean } {
+  ): void | IInputOrOutputValidation {
     const streamFile = fs.createReadStream(inputFile, "utf-8");
     const reader = readline.createInterface({
       input: streamFile
@@ -25,20 +25,6 @@ export class ProcessFile {
       if (currentLine === 0) {
         keys = line.trim().split(";");
       } else {
-        if (
-          !this.checkArrays(keys, [
-            "NomeCliente",
-            "CEP",
-            "RuaComComplemento",
-            "Bairro",
-            "Cidade",
-            "Estado",
-            "ValorFatura",
-            "NumeroPaginas"
-          ])
-        ) {
-          return { isValid: false };
-        }
         const value = line.trim().replace("-", "").split(";");
         const invoice: any = {};
 
@@ -129,9 +115,5 @@ export class ProcessFile {
     }
 
     stream.end();
-  }
-
-  private checkArrays(array1: string[], array2: string[]): boolean {
-    return JSON.stringify(array1) === JSON.stringify(array2);
   }
 }

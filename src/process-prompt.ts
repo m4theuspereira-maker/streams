@@ -1,6 +1,7 @@
 import fs from "fs";
 import { Interface } from "readline";
 import { ProcessFile } from "./process-file";
+import { IInputOrOutputValidation } from "./interfaces/interfaces";
 
 export class ProcessPrompt {
   constructor(
@@ -9,42 +10,30 @@ export class ProcessPrompt {
   ) {}
   processPrompt(input: string) {
     try {
-      if (!fs.existsSync(input)) {
-        throw new Error(
-          `arquivo "${input}" não encontrado! por favor digite um arquivo existente!`
-        );
-      }
+      const inputValidated = this.validateInputFile(input);
 
-      if (!input.includes(".txt")) {
-        throw new Error(
-          `${input} não aceito! Por favor adicione um arquivo com a extensão ".txt"`
-        );
+      if (!inputValidated.isValid) {
+        throw new Error(inputValidated.message);
       }
 
       this.reader.question(
         `Agora digite o caminho para a saída dos arquivos. Exemplo: "./pastaSaida/" ou caso não queria salvar em uma pasta basta digita "."!\n`,
         (answer) => {
           try {
-            if (
-              !answer.trim().startsWith("./") ||
-              !answer.trim().endsWith(`/`) ||
-              answer.trim() != "."
-            ) {
-              throw new Error(
-                `caminho não encontrado! por favor, digite o caminho de saída conforme o exemplo: "./pastaSaida/" ou "."`
-              );
+            const outputFilePathValidated =
+              this.validateOutputFilePlath(answer);
+
+            if (!outputFilePathValidated.isValid) {
+              throw new Error(outputFilePathValidated.message);
             }
 
-            if (!fs.existsSync(answer.trim())) {
-              fs.mkdirSync(answer.trim());
-            }
+            const outputPath =
+              answer === "." ? "planilha" : `${answer}planilha`;
 
-            const result = this.processFile.readTextFile(input, "./saida.csv");
+            const result = this.processFile.readTextFile(input, outputPath);
 
             if (result?.isValid === false) {
-              throw new Error(
-                `O arquivo ${input} não corresponde ao padrão, ele deve ter os seguintes dados na primeira linha "NomeCliente;CEP;RuaComComplemento;Bairro;Cidade;Estado;ValorFatura;NumeroPaginas"`
-              );
+              throw new Error(result.message);
             }
 
             console.log("Processamento feito com sucesso!");
@@ -66,5 +55,56 @@ export class ProcessPrompt {
         this.processPrompt(answer.trim());
       });
     }
+  }
+
+  private validateInputFile(input: string): IInputOrOutputValidation {
+    if (!fs.existsSync(input)) {
+      return {
+        isValid: false,
+        message: `arquivo "${input}" não encontrado! por favor digite um arquivo existente!`
+      };
+    }
+
+    if (!input.includes(".txt")) {
+      return {
+        isValid: false,
+        message: `${input} não aceito! Por favor adicione um arquivo com a extensão ".txt"`
+      };
+    }
+
+    const stats = fs.statSync(input);
+
+    if (stats.size === 0) {
+      return {
+        isValid: false,
+        message: `O arquivo ${input} não corresponde ao padrão, ele deve ter os seguintes dados na primeira linha "NomeCliente;CEP;RuaComComplemento;Bairro;Cidade;Estado;ValorFatura;NumeroPaginas"`
+      };
+    }
+
+    return { isValid: true };
+  }
+
+  private validateOutputFilePlath(path: string): IInputOrOutputValidation {
+    if (path.trim().length === 1 && path.trim().startsWith(".")) {
+      return {
+        isValid: true
+      };
+    }
+
+    if (
+      !path.trim().startsWith("./") ||
+      !path.trim().endsWith("/", path.length)
+    ) {
+      return {
+        isValid: false,
+        message: `caminho não encontrado! por favor, digite o caminho de saída conforme o exemplo: "./pastaSaida/" ou "."`
+      };
+    }
+
+    if (!fs.existsSync(path.trim())) {
+      fs.mkdirSync(path.trim());
+    }
+
+    return { isValid: true };
   }
 }
