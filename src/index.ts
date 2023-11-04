@@ -1,12 +1,15 @@
 import fs from "fs";
 import readline from "readline";
-
+import chalk from "chalk";
 import { ProcessFile } from "./process.file";
+
 const reader = readline.createInterface({
   input: process.stdin,
   output: process.stdout
 });
 
+const red = chalk.bold.red;
+const green = chalk.bold.green;
 const processFile = new ProcessFile();
 
 function processPrompt(input: string) {
@@ -46,7 +49,7 @@ exemplo "./pastaSaida/" ou caso não queria salvar em uma pasta basta digita "."
             );
           }
 
-          console.log("Processamento feito com sucesso!");
+          console.log(green("Processamento feito com sucesso!"));
           reader.close();
         } catch (error: any) {
           console.log(error.message);
@@ -57,13 +60,13 @@ exemplo "./pastaSaida/" ou caso não queria salvar em uma pasta basta digita "."
       }
     );
   } catch (error: any) {
-    console.log(error.message);
+    console.log(red(error.message));
     reader.question("Digite o arquivo de entrada ", (answer) => {
       processPrompt(answer.trim());
     });
   }
 }
 
-reader.question("Digite o arquivo de entrada ", (answer) => {
+reader.question(green("Digite o arquivo de entrada "), (answer) => {
   processPrompt(answer.trim());
 });
