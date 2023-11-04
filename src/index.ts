@@ -1,123 +1,84 @@
 import fs from "fs";
 import readline from "readline";
-import { IInvoice } from "./interfaces/interfaces";
 
-export class ProcessFile {
-  readTextFile(inputFile: string, outputFile: string): void {
-    var antes = Date.now();
-    const streamFile = fs.createReadStream(inputFile, "utf-8");
-    const reader = readline.createInterface({
-      input: streamFile
-    });
+import { ProcessFile } from "./process.file";
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout
+});
 
-    let keys: string[] = [];
+// new ProcessFile().readTextFile(nomeArquivo, "./misera/saida.csv");
 
-    let currentLine = 0;
-    const invoicesWith0000CEP: IInvoice[] = [];
-    const invoicesWithMax6Pages: IInvoice[] = [];
-    const invoicesWithMax12Pages: IInvoice[] = [];
-    const invoicesWithMoreThan12Pages: IInvoice[] = [];
-    const invoicesWithValue0: IInvoice[] = [];
-
-    reader.on("line", (line: string) => {
-      if (currentLine === 0) {
-        keys = line.trim().split(";");
-      } else {
-        const value = line.trim().replace("-", "").split(";");
-        const invoice: any = {};
-
-        for (let i = 0; i < keys.length; i++) {
-          invoice[keys[i]] = value[i].trim();
-          if (keys[i] === "NumeroPaginas") {
-            invoice[keys[i]] =
-              Number(value[i]) % 2 === 0
-                ? Number(value[i])
-                : Number(value[i]) + 1;
-          }
-
-          if (keys[i] === "ValorFatura") {
-            invoice[keys[i]] = Number(value[i]);
-          }
-        }
-
-        if (invoice.CEP === "00000000") {
-          invoicesWith0000CEP.push(invoice);
-        }
-
-        if (invoice.CEP !== "00000000" && invoice.ValorFatura === 0) {
-          invoicesWithValue0.push(invoice);
-        }
-
-        if (invoice.CEP !== "00000000" && invoice.NumeroPaginas <= 6) {
-          invoicesWithMax6Pages.push(invoice);
-        }
-
-        if (invoice.CEP !== "00000000" && invoice.NumeroPaginas <= 12) {
-          invoicesWithMax12Pages.push(invoice);
-        }
-
-        if (invoice.CEP !== "00000000" && invoice.NumeroPaginas > 12) {
-          invoicesWithMoreThan12Pages.push(invoice);
-        }
-      }
-
-      currentLine++;
-    });
-
-    reader.on("close", () => {
-      [
-        {
-          outputName: `${outputFile}-com-CEP-zerados.csv`,
-          invoices: invoicesWith0000CEP
-        },
-        {
-          outputName: `${outputFile}-com-ate-6-paginas.csv`,
-          invoices: invoicesWithMax6Pages
-        },
-        {
-          outputName: `${outputFile}-com-ate-12-paginas.csv`,
-          invoices: invoicesWithMax12Pages
-        },
-        {
-          outputName: `${outputFile}-com-mais-de-12-paginas.csv`,
-          invoices: invoicesWithMoreThan12Pages
-        },
-        {
-          outputName: `${outputFile}-com-valor-da-fatura-0.csv`,
-          invoices: invoicesWithValue0
-        }
-      ].forEach(({ outputName, invoices }) => {
-        this.writeCSVFile(outputName, invoices);
-      });
-
-      var duracao = Date.now() - antes;
-      console.log(duracao);
-    });
-  }
-
-  writeCSVFile(outputFileName: string, invoices: IInvoice[]) {
-    const stream = fs.createWriteStream(outputFileName, "utf-8");
-
-    stream.write("NomeCliente;EnderecoCompleto;ValorFatura;NumeroPaginas\n");
-
-    for (const invoice of invoices) {
-      const enderecoCompleto = `${
-        invoice.CEP
-      }, ${invoice.RuaComComplemento.trim()}, ${invoice.Cidade}, ${
-        invoice.Estado
-      }`;
-      const valorFatura = parseFloat(String(invoice.ValorFatura)).toFixed(2);
-
-      stream.write(
-        `${invoice.NomeCliente};${enderecoCompleto.trim()};${valorFatura};${
-          invoice.NumeroPaginas
-        }\n`
+function processPrompt(input: string) {
+  try {
+    if (!fs.existsSync(input)) {
+      throw new Error(
+        `arquivo "${input}" não encontrado! por favor digite um arquivo existente!`
       );
     }
 
-    stream.end();
+    if (!input.includes(".txt")) {
+      throw new Error(
+        `${input} não aceito! Por favor adicione um arquivo com a extensão ".txt"`
+      );
+    }
+
+    rl.question(
+      `Agora digite o caminho para a saída dos arquivos.
+exemplo "./pastaSaida/" ou caso não queria salvar em uma pasta basta digita "."!\n`,
+      (answer) => {
+        try {
+          if (!answer.includes(`./`) && !answer.includes(".")) {
+            throw new Error(
+              `caminho não encontrado! por favor, digite o caminho de saída conforme o exemplo: "./pastaSaida/" ou "."`
+            );
+          }
+
+          if (!fs.existsSync(answer.trim())) {
+            fs.mkdirSync(answer.trim());
+          }
+
+          const result = new ProcessFile().readTextFile(input, "./saida.csv");
+
+          if (result?.isValid === false) {
+            throw new Error(
+              `O arquivo ${input} não corresponde ao padrão, ele deve ter os seguintes dados na primeira linha "NomeCliente;CEP;RuaComComplemento;Bairro;Cidade;Estado;ValorFatura;NumeroPaginas"`
+            );
+          }
+
+          console.log("Processamento feito com sucesso!");
+          rl.close();
+        } catch (error: any) {
+          console.log(error.message);
+          rl.question("Digite o arquivo de entrada ", (answer) => {
+            processPrompt(answer.trim());
+          });
+        }
+      }
+    );
+  } catch (error: any) {
+    console.log(error.message);
+    rl.question("Digite o arquivo de entrada ", (answer) => {
+      processPrompt(answer.trim());
+    });
   }
 }
 
-const nomeArquivo = "base_hi.txt"; // Substitua pelo nome do seu arquivo
-new ProcessFile().readTextFile(nomeArquivo, "saida.csv");
+rl.question("Digite o arquivo de entrada ", (answer) => {
+  processPrompt(answer.trim());
+});
+
+// const inputFilePath = args(process.argv.slice(2))._.at(0);
+// const socorro = fs.openSync(inputFilePath!, "r");
+// console.log(socorro);
+// async function a() {
+//   const { inputFilePath } = await inquirer.prompt({
+//     message: "escolha o arquivo de entrada",
+//     type: "input",
+//     name: "inputFilePath"
+//   });
+
+//   console.log(inputFilePath);
+// }
+
+// a();
