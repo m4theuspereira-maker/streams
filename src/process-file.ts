@@ -15,7 +15,6 @@ export class ProcessFile {
     let keys: string[] = [];
 
     let currentLine = 0;
-    const invoicesWith0000CEP: IInvoice[] = [];
     const invoicesWithMax6Pages: IInvoice[] = [];
     const invoicesWithMax12Pages: IInvoice[] = [];
     const invoicesWithMoreThan12Pages: IInvoice[] = [];
@@ -42,23 +41,21 @@ export class ProcessFile {
           }
         }
 
-        if (invoice.CEP === "00000000") {
-          invoicesWith0000CEP.push(invoice);
-        }
+        const isCepValid = this.validateCEP(invoice.CEP);
 
-        if (invoice.CEP !== "00000000" && invoice.ValorFatura === 0) {
+        if (isCepValid && invoice.ValorFatura === 0) {
           invoicesWithValue0.push(invoice);
         }
 
-        if (invoice.CEP !== "00000000" && invoice.NumeroPaginas <= 6) {
+        if (isCepValid && invoice.NumeroPaginas <= 6) {
           invoicesWithMax6Pages.push(invoice);
         }
 
-        if (invoice.CEP !== "00000000" && invoice.NumeroPaginas <= 12) {
+        if (isCepValid && invoice.NumeroPaginas <= 12) {
           invoicesWithMax12Pages.push(invoice);
         }
 
-        if (invoice.CEP !== "00000000" && invoice.NumeroPaginas > 12) {
+        if (isCepValid && invoice.NumeroPaginas > 12) {
           invoicesWithMoreThan12Pages.push(invoice);
         }
       }
@@ -68,10 +65,6 @@ export class ProcessFile {
 
     reader.on("close", () => {
       [
-        {
-          outputName: `${outputFile}-com-CEP-zerados.csv`,
-          invoices: invoicesWith0000CEP
-        },
         {
           outputName: `${outputFile}-com-ate-6-paginas.csv`,
           invoices: invoicesWithMax6Pages
@@ -115,5 +108,19 @@ export class ProcessFile {
     }
 
     stream.end();
+  }
+
+  private validateCEP(cep: string): boolean {
+    cep = cep.trim();
+
+    const hasOnlyNumbers = /^[0-9]+$/;
+
+    const invalidCEP =
+      cep.length > 8 ||
+      cep.length < 7 ||
+      !hasOnlyNumbers.test(cep) ||
+      cep === "00000000";
+
+    return !invalidCEP;
   }
 }

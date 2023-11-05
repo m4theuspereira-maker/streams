@@ -17,7 +17,7 @@ export class ProcessPrompt {
       }
 
       this.reader.question(
-        `Agora digite o caminho para a saída dos arquivos. Exemplo: "./pastaSaida/" ou caso não queria salvar em uma pasta basta digita "."!\n`,
+        `Agora digite o caminho para a saída dos arquivos. Exemplo: "pastaSaida" ou caso não queria salvar em uma pasta, basta teclar ENTER!\n`,
         (answer) => {
           try {
             const outputFilePathValidated =
@@ -28,7 +28,7 @@ export class ProcessPrompt {
             }
 
             const outputPath =
-              answer === "." ? "planilha" : `${answer}planilha`;
+              answer === "" ? "planilha" : `./${answer}/planilha`;
 
             const result = this.processFile.readTextFile(input, outputPath);
 
@@ -85,19 +85,9 @@ export class ProcessPrompt {
   }
 
   private validateOutputFilePlath(path: string): IInputOrOutputValidation {
-    if (path.trim().length === 1 && path.trim().startsWith(".")) {
+    if (!path.trim().length) {
       return {
         isValid: true
-      };
-    }
-
-    if (
-      !path.trim().startsWith("./") ||
-      !path.trim().endsWith("/", path.length)
-    ) {
-      return {
-        isValid: false,
-        message: `caminho não encontrado! por favor, digite o caminho de saída conforme o exemplo: "./pastaSaida/" ou "."`
       };
     }
 
