@@ -10,6 +10,6 @@ const reader = readline.createInterface({
 const processFile = new ProcessFile();
 const processPrompt = new ProcessPrompt(reader, processFile);
 
-reader.question(`Digite o arquivo de entrada: \n`, (answer) => {
+reader.question(`⌨️ Digite o arquivo de entrada: \n`, (answer) => {
   processPrompt.processPrompt(answer.trim());
 });

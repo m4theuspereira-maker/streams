@@ -23,7 +23,7 @@ describe("ProcessPrompt", () => {
       expect(result).toStrictEqual({
         isValid: false,
         message:
-          'arquivo "mock_file" não encontrado! por favor digite um arquivo existente!'
+          '❌arquivo "mock_file" não encontrado! por favor digite um arquivo existente!❌'
       });
     });
 
@@ -33,7 +33,7 @@ describe("ProcessPrompt", () => {
       expect(result).toStrictEqual({
         isValid: false,
         message:
-          'arquivo "mock_file.txt" não encontrado! por favor digite um arquivo existente!'
+          '❌arquivo "mock_file.txt" não encontrado! por favor digite um arquivo existente!❌'
       });
     });
 
@@ -46,8 +46,7 @@ describe("ProcessPrompt", () => {
 
       expect(result).toStrictEqual({
         isValid: false,
-        message:
-          'O arquivo base_hi.txt não corresponde ao padrão, ele deve ter os seguintes dados na primeira linha "NomeCliente;CEP;RuaComComplemento;Bairro;Cidade;Estado;ValorFatura;NumeroPaginas"'
+        message: "❌O arquivo base_hi.txt está vazio!❌"
       });
     });
   });

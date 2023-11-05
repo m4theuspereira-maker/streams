@@ -61,14 +61,14 @@ export class ProcessPrompt {
     if (!fs.existsSync(input)) {
       return {
         isValid: false,
-        message: `arquivo "${input}" não encontrado! por favor digite um arquivo existente!`
+        message: `❌arquivo "${input}" não encontrado! por favor digite um arquivo existente!❌`
       };
     }
 
     if (!input.includes(".txt")) {
       return {
         isValid: false,
-        message: `${input} não aceito! Por favor adicione um arquivo com a extensão ".txt"`
+        message: `❌${input} não aceito! Por favor adicione um arquivo com a extensão ".txt"❌`
       };
     }
 
@@ -77,7 +77,7 @@ export class ProcessPrompt {
     if (stats.size === 0) {
       return {
         isValid: false,
-        message: `O arquivo ${input} não corresponde ao padrão, ele deve ter os seguintes dados na primeira linha "NomeCliente;CEP;RuaComComplemento;Bairro;Cidade;Estado;ValorFatura;NumeroPaginas"`
+        message: `❌O arquivo ${input} está vazio!❌`
       };
     }
 
