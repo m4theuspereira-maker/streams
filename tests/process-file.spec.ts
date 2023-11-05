@@ -18,11 +18,11 @@ describe("ProcessPrompt", () => {
     });
 
     it("should return false if CEP has more than 8 characters", () => {
-      expect(processFile[`validateCEP`]("000000000")).toBeFalsy();
+      expect(processFile[`validateCEP`]("123456789")).toBeFalsy();
     });
 
     it("should return false if CEP has less than 7 characters", () => {
-      expect(processFile[`validateCEP`]("000000")).toBeFalsy();
+      expect(processFile[`validateCEP`]("123456")).toBeFalsy();
     });
 
     it("should return true if CEP was valid according validations", () => {
