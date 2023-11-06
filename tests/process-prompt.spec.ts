@@ -39,14 +39,15 @@ describe("ProcessPrompt", () => {
 
     it("should return error if file found was empty", () => {
       vitest.spyOn(fs, "statSync").mockReturnValueOnce({ size: 0 } as any);
+      vitest.spyOn(fs, "existsSync").mockReturnValueOnce(true);
 
       processPromp = new ProcessPrompt(reader, new ProcessFile());
 
-      const result = processPromp["validateInputFile"]("base_hi.txt");
+      const result = processPromp["validateInputFile"]("mock_file.txt");
 
       expect(result).toStrictEqual({
         isValid: false,
-        message: "❌O arquivo base_hi.txt está vazio!❌"
+        message: "❌O arquivo mock_file.txt está vazio!❌"
       });
     });
   });
