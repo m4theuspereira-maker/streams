@@ -11,8 +11,7 @@
     "test:watch": "npm test -- --watch",
     "test:coverage": "npm test -- --coverage",
     "dev": "tsx src/index.ts",
-    "start": "node dist/index.js",
-    "prepare": "husky install && npx husky add .husky/pre-commit 'npx lint-staged' && npx husky add .husky/pre-push 'npm test' "
+    "start": "node dist/index.js"
   },
   "bin": "dist/index.js",
   "keywords": [],
@@ -39,14 +38,5 @@
   },
   "dependencies": {
     "pkg": "^5.8.1"
-  },
-  "hooks": {
-    "pre-commit": "lint-staged",
-    "pre-push": "npm run eslint"
-  },
-  "lint-staged": {
-    "**/*.{ts,js}": [
-      "vitest related --run"
-    ]
   }
 }
